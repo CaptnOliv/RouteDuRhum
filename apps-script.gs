@@ -1,3 +1,7 @@
+/**
+ * @OnlyCurrentDoc  Limite l'autorisation à cette seule Google Sheet.
+ */
+
 // Backend minimal : stocke les inscriptions dans la Google Sheet à laquelle ce script est rattaché.
 // Colonnes : Date | Bateau | Personnes | Amène
 

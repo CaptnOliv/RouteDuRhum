@@ -10,9 +10,7 @@
   body {
     margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     color: #1b2733; background-color: var(--bleu);
-    /* fond.jpg (local) prioritaire, sinon la photo en ligne, sinon le dégradé */
     background-image: linear-gradient(rgba(5,30,50,.45), rgba(5,30,50,.65)), url("fond.jpg"),
-                      url("https://img.over-blog-kiwi.com/1/04/49/45/20141102/ob_b393f9_depart-route-du-rhum-dans-le-peloton.jpg"),
                       linear-gradient(180deg, #f6a65a 0%, #e0607e 30%, #2a6f97 60%, #0b3a5c 100%);
     background-size: cover; background-position: center; background-attachment: fixed;
   }
@@ -44,8 +42,7 @@
 <body>
 <main>
   <header>
-    <img class="mascotte" src="tymal.png" alt=""
-         onerror="this.onerror=()=>this.remove(); this.src='https://www.saint-malo.fr/wp-content/uploads/2026/06/TymalRDR-1022x1024.png'">
+    <img class="mascotte" src="tymal.png" alt="">
     <h1>⛵ Route du Rhum Start Party 🥃</h1>
     <p><strong>Sunday, November 1st · 12pm – 5pm</strong></p>
     <p>Philips Hall – Marina di Licata</p>

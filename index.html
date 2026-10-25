@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,8 +10,9 @@
   body {
     margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     color: #1b2733; background-color: var(--bleu);
-    /* Déposez une photo de la Route du Rhum nommée fond.jpg à côté de ce fichier */
+    /* fond.jpg (local) prioritaire, sinon la photo en ligne, sinon le dégradé */
     background-image: linear-gradient(rgba(5,30,50,.45), rgba(5,30,50,.65)), url("fond.jpg"),
+                      url("https://img.over-blog-kiwi.com/1/04/49/45/20141102/ob_b393f9_depart-route-du-rhum-dans-le-peloton.jpg"),
                       linear-gradient(180deg, #f6a65a 0%, #e0607e 30%, #2a6f97 60%, #0b3a5c 100%);
     background-size: cover; background-position: center; background-attachment: fixed;
   }
@@ -19,6 +20,7 @@
   header { color: var(--blanc); text-align: center; margin-bottom: 24px; text-shadow: 0 2px 8px rgba(0,0,0,.5); }
   header h1 { margin: 0 0 6px; font-size: 2rem; }
   header p { margin: 4px 0; }
+  .mascotte { width: 120px; height: auto; display: block; margin: 0 auto 8px; filter: drop-shadow(0 4px 10px rgba(0,0,0,.4)); }
   .carte { background: rgba(255,255,255,.94); border-radius: 14px; padding: 20px; margin-bottom: 20px; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
   h2 { margin: 0 0 14px; font-size: 1.2rem; color: var(--bleu); }
   label { display: block; font-weight: 600; margin: 12px 0 4px; font-size: .95rem; }
@@ -42,31 +44,34 @@
 <body>
 <main>
   <header>
-    <h1>⛵ Départ de la Route du Rhum 🥃</h1>
-    <p><strong>Dimanche 1<sup>er</sup> novembre · 12h – 17h</strong></p>
+    <img class="mascotte" src="tymal.png" alt=""
+         onerror="this.onerror=()=>this.remove(); this.src='https://www.saint-malo.fr/wp-content/uploads/2026/06/TymalRDR-1022x1024.png'">
+    <h1>⛵ Route du Rhum Start Party 🥃</h1>
+    <p><strong>Sunday, November 1st · 12pm – 5pm</strong></p>
     <p>Philips Hall – Marina di Licata</p>
-    <p>Finger food froide à partager · rhum conseillé 😉</p>
+    <p>Live broadcast of the start (in French!)</p>
+    <p>Bring cold finger food to share · rum recommended 😉</p>
   </header>
 
   <section class="carte">
-    <h2>Inscription</h2>
+    <h2>Sign up</h2>
     <form id="form">
-      <label for="bateau">Nom du bateau</label>
+      <label for="bateau">Boat name</label>
       <input id="bateau" name="bateau" required maxlength="80">
-      <label for="personnes">Nombre de personnes</label>
+      <label for="personnes">Number of people</label>
       <input id="personnes" name="personnes" type="number" min="1" max="30" value="2" required>
-      <label for="amene">Ce que vous amenez</label>
-      <textarea id="amene" name="amene" required maxlength="500" placeholder="ex : cake salé, bouteille de rhum arrangé…"></textarea>
-      <button type="submit" id="envoyer">S'inscrire</button>
+      <label for="amene">What you'll bring</label>
+      <textarea id="amene" name="amene" required maxlength="500" placeholder="e.g. mini quiches, a bottle of spiced rum…"></textarea>
+      <button type="submit" id="envoyer">Sign up</button>
       <p class="msg" id="msg"></p>
     </form>
-    <p class="info">Inscriptions jusqu'au samedi 31 octobre.</p>
+    <p class="info">Please sign up by Saturday, October 31st.</p>
   </section>
 
   <section class="carte">
-    <h2>Qui vient ?</h2>
+    <h2>Who's coming?</h2>
     <p class="total" id="total"></p>
-    <ul id="liste"><li>Chargement…</li></ul>
+    <ul id="liste"><li>Loading…</li></ul>
   </section>
 </main>
 
@@ -100,23 +105,23 @@
   function afficher(liste) {
     const ul = $("liste");
     ul.innerHTML = "";
-    if (!liste.length) { ul.innerHTML = "<li>Personne pour l'instant, soyez les premiers !</li>"; }
+    if (!liste.length) { ul.innerHTML = "<li>Nobody yet — be the first!</li>"; }
     let total = 0;
     for (const i of liste) {
       total += Number(i.personnes) || 0;
       const li = document.createElement("li");
-      const nb = document.createElement("span"); nb.className = "nb"; nb.textContent = i.personnes + " pers.";
+      const nb = document.createElement("span"); nb.className = "nb"; nb.textContent = i.personnes + (i.personnes > 1 ? " people" : " person");
       const b = document.createElement("div"); b.className = "bateau"; b.textContent = i.bateau;
       const a = document.createElement("div"); a.className = "amene"; a.textContent = i.amene;
       li.append(nb, b, a);
       ul.append(li);
     }
-    $("total").textContent = liste.length ? `${liste.length} bateau(x) · ${total} personne(s)` : "";
+    $("total").textContent = liste.length ? `${liste.length} boat${liste.length > 1 ? "s" : ""} · ${total} ${total > 1 ? "people" : "person"}` : "";
   }
 
   async function rafraichir() {
     try { afficher(await charger()); }
-    catch { $("liste").innerHTML = "<li>Impossible de charger la liste.</li>"; }
+    catch { $("liste").innerHTML = "<li>Could not load the list.</li>"; }
   }
 
   $("form").addEventListener("submit", async (e) => {
@@ -131,17 +136,17 @@
     try {
       await ajouter(inscription);
       e.target.reset();
-      msg.textContent = "Merci, c'est noté ! 🎉"; msg.classList.add("ok");
+      msg.textContent = "Thanks, you're in! 🎉"; msg.classList.add("ok");
       await rafraichir();
     } catch {
-      msg.textContent = "Oups, l'inscription n'est pas passée. Réessayez."; msg.classList.add("err");
+      msg.textContent = "Oops, sign-up failed. Please try again."; msg.classList.add("err");
     } finally {
       bouton.disabled = false;
     }
   });
 
   if (new Date() >= DATE_LIMITE) {
-    $("form").innerHTML = "<p><strong>Les inscriptions sont closes. À dimanche !</strong></p>";
+    $("form").innerHTML = "<p><strong>Sign-ups are closed. See you Sunday!</strong></p>";
   }
   rafraichir();
 </script>

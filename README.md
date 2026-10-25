@@ -4,7 +4,7 @@ Petit site d'inscription : nom du bateau, nombre de personnes, ce que chacun am�
 
 - `index.html` : le site (une seule page, à héberger sur GitHub Pages).
 - `apps-script.gs` : le « serveur », un script Google qui enregistre les inscriptions dans une Google Sheet.
-- `fond.jpg` : image de fond (à ajouter, voir plus bas).
+- `fond.jpg` / `tymal.png` (optionnels) : image de fond et mascotte. Sans eux, le site utilise les images en ligne (photo du peloton sur over-blog, Tymal sur saint-malo.fr).
 
 ## Mise en ligne (≈ 10 min)
 
@@ -18,8 +18,8 @@ Petit site d'inscription : nom du bateau, nombre de personnes, ce que chacun am�
 
 ### 2. Le site
 1. Dans `index.html`, coller l'URL dans `const API_URL = "...";`.
-2. Ajouter une photo de la Route du Rhum nommée `fond.jpg` à la racine du dépôt
-   (sans elle, un dégradé « coucher de soleil sur la mer » s'affiche).
+2. (Conseillé) Télécharger les deux images et les ajouter à la racine du dépôt sous les noms
+   `fond.jpg` et `tymal.png`, pour ne pas dépendre des sites qui les hébergent.
 3. Sur GitHub : **Settings → Pages → Deploy from a branch**, choisir la branche et `/ (root)`.
 4. Le site est disponible à `https://captnoliv.github.io/RouteDuRhum/` : c'est ce lien à mettre dans le message WhatsApp.
 

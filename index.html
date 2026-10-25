@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Route du Rhum – Marina di Licata</title>
+<style>
+  :root { --bleu: #0b3a5c; --rouge: #d7262e; --blanc: #fff; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    color: #1b2733; background-color: var(--bleu);
+    /* Déposez une photo de la Route du Rhum nommée fond.jpg à côté de ce fichier */
+    background-image: linear-gradient(rgba(5,30,50,.45), rgba(5,30,50,.65)), url("fond.jpg"),
+                      linear-gradient(180deg, #f6a65a 0%, #e0607e 30%, #2a6f97 60%, #0b3a5c 100%);
+    background-size: cover; background-position: center; background-attachment: fixed;
+  }
+  main { max-width: 640px; margin: 0 auto; padding: 32px 16px 48px; }
+  header { color: var(--blanc); text-align: center; margin-bottom: 24px; text-shadow: 0 2px 8px rgba(0,0,0,.5); }
+  header h1 { margin: 0 0 6px; font-size: 2rem; }
+  header p { margin: 4px 0; }
+  .carte { background: rgba(255,255,255,.94); border-radius: 14px; padding: 20px; margin-bottom: 20px; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+  h2 { margin: 0 0 14px; font-size: 1.2rem; color: var(--bleu); }
+  label { display: block; font-weight: 600; margin: 12px 0 4px; font-size: .95rem; }
+  input, textarea { width: 100%; padding: 10px; font: inherit; border: 1px solid #b8c4cf; border-radius: 8px; }
+  textarea { min-height: 80px; resize: vertical; }
+  button { margin-top: 16px; width: 100%; padding: 12px; font: inherit; font-weight: 700; color: var(--blanc);
+           background: var(--rouge); border: 0; border-radius: 8px; cursor: pointer; }
+  button:disabled { opacity: .6; cursor: wait; }
+  .info { font-size: .9rem; color: #4a5866; margin: 8px 0 0; }
+  .msg { margin-top: 10px; font-weight: 600; }
+  .ok { color: #1d7a3a; } .err { color: var(--rouge); }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { padding: 10px 0; border-top: 1px solid #e2e8ee; }
+  li:first-child { border-top: 0; }
+  .bateau { font-weight: 700; color: var(--bleu); }
+  .nb { float: right; font-size: .9rem; color: #4a5866; }
+  .amene { margin-top: 4px; white-space: pre-wrap; }
+  .total { font-weight: 700; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>⛵ Départ de la Route du Rhum 🥃</h1>
+    <p><strong>Dimanche 1<sup>er</sup> novembre · 12h – 17h</strong></p>
+    <p>Philips Hall – Marina di Licata</p>
+    <p>Finger food froide à partager · rhum conseillé 😉</p>
+  </header>
+
+  <section class="carte">
+    <h2>Inscription</h2>
+    <form id="form">
+      <label for="bateau">Nom du bateau</label>
+      <input id="bateau" name="bateau" required maxlength="80">
+      <label for="personnes">Nombre de personnes</label>
+      <input id="personnes" name="personnes" type="number" min="1" max="30" value="2" required>
+      <label for="amene">Ce que vous amenez</label>
+      <textarea id="amene" name="amene" required maxlength="500" placeholder="ex : cake salé, bouteille de rhum arrangé…"></textarea>
+      <button type="submit" id="envoyer">S'inscrire</button>
+      <p class="msg" id="msg"></p>
+    </form>
+    <p class="info">Inscriptions jusqu'au samedi 31 octobre.</p>
+  </section>
+
+  <section class="carte">
+    <h2>Qui vient ?</h2>
+    <p class="total" id="total"></p>
+    <ul id="liste"><li>Chargement…</li></ul>
+  </section>
+</main>
+
+<script>
+  // URL de l'application Web Google Apps Script (voir README.md).
+  // Laissez vide pour tester en local : les inscriptions restent alors dans votre navigateur.
+  const API_URL = "";
+
+  const DATE_LIMITE = new Date("2026-11-01T00:00:00+01:00");
+  const $ = (id) => document.getElementById(id);
+
+  async function charger() {
+    if (!API_URL) return JSON.parse(localStorage.getItem("inscriptions") || "[]");
+    const r = await fetch(API_URL);
+    return r.json();
+  }
+
+  async function ajouter(inscription) {
+    if (!API_URL) {
+      const liste = await charger();
+      liste.push(inscription);
+      localStorage.setItem("inscriptions", JSON.stringify(liste));
+      return;
+    }
+    // text/plain évite la requête préalable CORS, non gérée par Apps Script
+    const r = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(inscription) });
+    const res = await r.json();
+    if (!res.ok) throw new Error(res.error || "Erreur");
+  }
+
+  function afficher(liste) {
+    const ul = $("liste");
+    ul.innerHTML = "";
+    if (!liste.length) { ul.innerHTML = "<li>Personne pour l'instant, soyez les premiers !</li>"; }
+    let total = 0;
+    for (const i of liste) {
+      total += Number(i.personnes) || 0;
+      const li = document.createElement("li");
+      const nb = document.createElement("span"); nb.className = "nb"; nb.textContent = i.personnes + " pers.";
+      const b = document.createElement("div"); b.className = "bateau"; b.textContent = i.bateau;
+      const a = document.createElement("div"); a.className = "amene"; a.textContent = i.amene;
+      li.append(nb, b, a);
+      ul.append(li);
+    }
+    $("total").textContent = liste.length ? `${liste.length} bateau(x) · ${total} personne(s)` : "";
+  }
+
+  async function rafraichir() {
+    try { afficher(await charger()); }
+    catch { $("liste").innerHTML = "<li>Impossible de charger la liste.</li>"; }
+  }
+
+  $("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const msg = $("msg"), bouton = $("envoyer");
+    const inscription = {
+      bateau: $("bateau").value.trim(),
+      personnes: Number($("personnes").value),
+      amene: $("amene").value.trim(),
+    };
+    bouton.disabled = true; msg.textContent = ""; msg.className = "msg";
+    try {
+      await ajouter(inscription);
+      e.target.reset();
+      msg.textContent = "Merci, c'est noté ! 🎉"; msg.classList.add("ok");
+      await rafraichir();
+    } catch {
+      msg.textContent = "Oups, l'inscription n'est pas passée. Réessayez."; msg.classList.add("err");
+    } finally {
+      bouton.disabled = false;
+    }
+  });
+
+  if (new Date() >= DATE_LIMITE) {
+    $("form").innerHTML = "<p><strong>Les inscriptions sont closes. À dimanche !</strong></p>";
+  }
+  rafraichir();
+</script>
+</body>
+</html>
